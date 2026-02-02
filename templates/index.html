@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Text Summarizer</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-alt"></i> Advanced Text Summarizer</h1>
+            <p>Generate intelligent summaries using state-of-the-art AI models</p>
+        </header>
+
+        <div class="main-content">
+            <form method="POST" class="summarizer-form">
+                <div class="form-section">
+                    <h3><i class="fas fa-cogs"></i> Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label for="summary_type">Summary Type:</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="summary_type" value="abstractive" {% if summary_type == 'abstractive' %}checked{% endif %}>
+                                <span class="radio-text">Abstractive (T5 Model)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="summary_type" value="extractive" {% if summary_type == 'extractive' %}checked{% endif %}>
+                                <span class="radio-text">Extractive (TextRank)</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="summary_type" value="both" {% if summary_type == 'both' or not summary_type %}checked{% endif %}>
+                                <span class="radio-text">Both Methods</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="summary_length">
+                            Summary Length: <span id="length-value">{{ summary_length }}</span>
+                        </label>
+                        <input type="range" id="summary_length" name="summary_length" 
+                               min="1" max="5" value="{{ summary_length }}" 
+                               oninput="updateLengthValue(this.value)">
+                        <div class="length-labels">
+                            <span>Short</span>
+                            <span>Medium</span>
+                            <span>Long</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-edit"></i> Input Text</h3>
+                    <textarea name="text" placeholder="Paste your long text here to generate a summary..." required>{{ original_text }}</textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-magic"></i> Generate Summary
+                </button>
+            </form>
+
+            {% if abstractive_summary or extractive_summary %}
+            <div class="results-section">
+                <h3><i class="fas fa-chart-line"></i> Results</h3>
+                
+                {% if abstractive_summary %}
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h4><i class="fas fa-brain"></i> Abstractive Summary (T5 Model)</h4>
+                        <div class="summary-actions">
+                            <button onclick="downloadSummary('abstractive', '{{ abstractive_summary }}')" class="download-btn">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="summary-content">
+                        <p>{{ abstractive_summary }}</p>
+                    </div>
+                    <div class="confidence-info">
+                        <div class="confidence-score">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Confidence: {{ abstractive_confidence }}% ({{ abstractive_label }})</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if extractive_summary %}
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h4><i class="fas fa-search"></i> Extractive Summary (TextRank)</h4>
+                        <div class="summary-actions">
+                            <button onclick="downloadSummary('extractive', '{{ extractive_summary }}')" class="download-btn">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="summary-content">
+                        <p>{{ extractive_summary }}</p>
+                    </div>
+                    <div class="confidence-info">
+                        <div class="confidence-score">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Confidence: {{ extractive_confidence }}% ({{ extractive_label }})</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="model-info-section">
+                <h3><i class="fas fa-info-circle"></i> Model Information & Performance</h3>
+                <div class="model-cards">
+                    <div class="model-card">
+                        <h4>T5 Small Model</h4>
+                        <p><strong>Type:</strong> Abstractive Summarization</p>
+                        <p><strong>Description:</strong> Transformer-based model that generates new text by paraphrasing and condensing the original content.</p>
+                        <p><strong>Best for:</strong> Creative summaries, rephrasing complex ideas</p>
+                        <p><strong>Performance:</strong> ~60M parameters, ROUGE scores typically 35-45 on news datasets</p>
+                        <p><strong>Processing:</strong> Generates summaries with variable length based on input complexity</p>
+                    </div>
+                    <div class="model-card">
+                        <h4>TextRank Algorithm</h4>
+                        <p><strong>Type:</strong> Extractive Summarization</p>
+                        <p><strong>Description:</strong> Graph-based ranking algorithm that selects the most important sentences from the original text.</p>
+                        <p><strong>Best for:</strong> Factual summaries, preserving original wording</p>
+                        <p><strong>Performance:</strong> ROUGE scores typically 40-50, faster processing than abstractive methods</p>
+                        <p><strong>Processing:</strong> Extracts top-ranked sentences without text generation</p>
+                    </div>
+                </div>
+                
+                <div class="performance-metrics">
+                    <h4>Confidence Score Interpretation</h4>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">High (65%+)</span>
+                            <span class="metric-desc">Excellent similarity between original and summary</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Medium (40-64%)</span>
+                            <span class="metric-desc">Good similarity, minor differences expected</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Low (&lt;40%)</span>
+                            <span class="metric-desc">Significant differences, review summary carefully</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateLengthValue(value) {
+            document.getElementById('length-value').textContent = value;
+        }
+
+        function downloadSummary(type, text) {
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = type + '_summary.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
