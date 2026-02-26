@@ -136,16 +136,20 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 textarea {
-    width: 100%;
-    min-height: 200px;
-    padding: 20px;
-    border: 2px solid #e1e8ed;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-family: inherit;
+    display: block;
+    margin: 0 auto;
+    width: 70%;
+    max-width: 650px;
+    min-height: 160px;
+    padding: 15px;
+    font-size: 15px;
+    color: #000000;
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: none;
+    outline: none;
     resize: vertical;
-    transition: border-color 0.3s ease;
-    background: #f8f9fa;
+    line-height: 1.6;
 }
 
 textarea:focus {
@@ -155,26 +159,22 @@ textarea:focus {
 }
 
 .submit-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+     display: block;
+    margin: 15px auto;
+    padding: 8px 22px;      /* smaller padding */
+    font-size: 13px;        /* smaller text */
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #764ba2;
     border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    border-radius: 5px;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 30px;
+    width: auto;            /* prevents stretching */
 }
 
 .submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 25px green;
 }
 
 .results-section {
